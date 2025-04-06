@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { LocationInput } from "./LocationInput";
-import crypto from "crypto";
 
 const REPORT_TYPES = [
   "Illegal Dumping",
@@ -77,14 +76,25 @@ export function ReportForm({ onComplete }: ReportFormProps) {
     }
   };
 
-  const generateReportId = useCallback(() => {
+  const generateReportId = useCallback(async () => {
+    if (typeof window === "undefined") return "fallback-id"; // Shouldn’t happen with "use client"
+
     const timestamp = Date.now().toString();
-    const randomBytes = crypto.randomBytes(16).toString("hex");
-    const combinedString = `${timestamp}-${randomBytes}`; // Fixed syntax
-    return crypto
-      .createHash("sha256")
-      .update(combinedString)
-      .digest("hex")
+    const randomValues = new Uint8Array(16);
+    window.crypto.getRandomValues(randomValues);
+    const randomString = Array.from(randomValues)
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("");
+    const combinedString = `${timestamp}-${randomString}`;
+
+    const hashBuffer = await window.crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(combinedString)
+    );
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("")
       .slice(0, 16);
   }, []);
 
@@ -93,8 +103,9 @@ export function ReportForm({ onComplete }: ReportFormProps) {
     setIsSubmitting(true);
 
     try {
+      const reportId = await generateReportId();
       const reportData = {
-        reportId: generateReportId(),
+        reportId,
         type: formData.incidentType,
         specificType: formData.specificType,
         title: formData.title,

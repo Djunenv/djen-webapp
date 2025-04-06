@@ -1,4 +1,5 @@
-// @ts-nocheck
+"use client";
+
 import { useState } from "react";
 import { AddressAutofill } from "@mapbox/search-js-react";
 
@@ -17,14 +18,16 @@ export function LocationInput({
   const [locationError, setLocationError] = useState<string | null>(null);
 
   const getLocation = async () => {
+    // Ensure this only runs in the browser
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setLocationError("Geolocation is not supported by your browser");
+      return;
+    }
+
     setIsGettingLocation(true);
     setLocationError(null);
 
     try {
-      if (!navigator.geolocation) {
-        throw new Error("Geolocation is not supported by your browser");
-      }
-
       const position = await new Promise<GeolocationPosition>(
         (resolve, reject) => {
           navigator.geolocation.getCurrentPosition(
@@ -76,7 +79,7 @@ export function LocationInput({
         Location
       </label>
       <div className="relative">
-        <AddressAutofill
+        {/* <AddressAutofill
           accessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ""}
         >
           <input
@@ -85,18 +88,13 @@ export function LocationInput({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder="Enter location or use pin"
-            className="w-full rounded-xl bg-zinc-900/50 border border-zinc-800 pl-4 pr-12 py-3.5
-                     text-white transition-colors duration-200
-                     focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="w-full rounded-xl bg-zinc-900/50 border border-zinc-800 pl-4 pr-12 py-3.5 text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
           />
-        </AddressAutofill>
+        </AddressAutofill> */}
         <button
           type="button"
           onClick={getLocation}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5
-                   rounded-lg bg-sky-500/10 text-sky-400 
-                   hover:bg-sky-500/20 transition-colors duration-200
-                   disabled:opacity-50 disabled:cursor-not-allowed"
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isGettingLocation}
           title="Get current location"
         >
@@ -114,12 +112,12 @@ export function LocationInput({
                 r="10"
                 stroke="currentColor"
                 strokeWidth="4"
-              ></circle>
+              />
               <path
                 className="opacity-75"
                 fill="currentColor"
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
+              />
             </svg>
           ) : (
             <svg
