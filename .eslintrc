@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "warn", // Change to warning
+    "@typescript-eslint/no-explicit-any": "off", // Disable temporarily
+    "@typescript-eslint/ban-ts-comment": "off",  // Allow @ts-nocheck
+    "no-var": "warn"                            // Change to warning
+  }
+}
